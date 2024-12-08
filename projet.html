@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ceres Exploration</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* General Reset */
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden; /* To prevent horizontal scroll */
+        }
+
+        /* Video Background */
+        .hero {
+            position: relative;
+            height: 100vh; /* Full height of viewport */
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        #background-video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+        }
+
+        .hero-content {
+            position: relative;
+            color: white;
+            z-index: 1;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+        }
+
+        .hero h2 {
+            font-size: 3em;
+            text-shadow: 0px 0px 20px cyan;
+            margin-bottom: 0.5em;
+        }
+
+        .hero p {
+            font-size: 1.2em;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Navbar Style */
+        #navbar {
+            position: fixed;
+            top: 20px;
+            left: 72px;
+            width: 1200px;
+            padding: 15px 20px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+            z-index: 1000;
+            opacity: 70%;
+        }
+
+        #navbar .logo h1 {
+            color: #00b8d4;
+            font-size: 2em;
+            letter-spacing: 2px;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-links li {
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 1.2em;
+            letter-spacing: 1px;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #00b8d4;
+            transform: scale(1.1);
+            text-shadow: 0 0 20px #00b8d4, 0 0 40px #00b8d4;
+        }
+
+        #discover-btn {
+            background-color: #070707;
+            color: #fff;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+            opacity: 70%;
+            z-index: 1001; /* Ensure the button is clickable */
+        }
+
+        #discover-btn:hover {
+            background-color: #460491;
+        }
+
+        /* New Section for Video and Description */
+        #video-section {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 50px 10%;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            margin-top: 50px; /* Adds space for scrolling */
+        }
+
+        #video-section video {
+            max-width: 50%;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+            margin-right: 50px;
+        }
+
+        #video-section .description {
+            max-width: 40%;
+            font-family: 'Roboto', sans-serif;
+            font-size: 1.2em;
+            color: #fff;
+            line-height: 1.6;
+        }
+
+        /* Ensure smooth scroll to section */
+        .scroll-target {
+            height: 100vh;
+        }
+        #creative-gallery {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 50px 0;
+}
+
+#gallery-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+}
+
+.gallery-image {
+    width: 100px;
+    height: auto;
+    margin: 0 10px;
+    border-radius: 10px;
+    transition: transform 0.5s ease, opacity 0.5s ease;
+    opacity: 0.5; /* Reduce opacity for smaller images */
+}
+
+.gallery-image.center {
+    width: 300px; /* Central image size */
+    opacity: 1; /* Full opacity for the central image */
+    transform: scale(1.2); /* Slight zoom for the central image */
+    box-shadow: 0 10px 20px rgba(0, 255, 255, 0.5);
+}
+
+#gallery-controls {
+    margin-top: 20px;
+}
+
+#gallery-controls button {
+    background-color: #070707;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    font-size: 1em;
+    cursor: pointer;
+    border-radius: 5px;
+    margin: 0 10px;
+    transition: background-color 0.3s ease;
+    opacity: 70%;
+}
+
+#gallery-controls button:hover {
+    background-color: #460491;
+    color: black;
+}
+
+/* Loading Screen Styles */
+#loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, #000a1f, #000); /* Space-like gradient */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999; /* Ensure it's on top */
+    animation: fadeOut 1s ease 3s forwards; /* Automatic fade-out after 3 seconds */
+}
+
+/* Rotating Planet */
+.loading-planet {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 20px;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.5); /* Glow effect */
+}
+
+.planet {
+    width: 100%;
+    height: 100%;
+    background: url('https://cdn.eso.org/images/screen/eso1609a.jpg') no-repeat center;
+    background-size: cover;
+    animation: rotatePlanet 5s linear infinite; /* Smooth rotation */
+}
+
+/* Planet Rotation Animation */
+@keyframes rotatePlanet {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Text Styling */
+#loading-screen h1 {
+    color: #00b8d4;
+    font-family: 'Roboto', sans-serif;
+    font-size: 2em;
+    letter-spacing: 2px;
+    text-align: center;
+    opacity: 0;
+    animation: fadeInText 2s ease forwards;
+    animation-delay: 1s; /* Delays text fade-in for better timing */
+}
+
+/* Text Fade-In Animation */
+@keyframes fadeInText {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Loading Screen Fade-Out Animation */
+@keyframes fadeOut {
+    to {
+        opacity: 0;
+        visibility: hidden;
+    }
+}
+/* Info Section Styling */
+.info-section {
+    padding: 50px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* Ensures section fills the screen */
+    overflow: hidden;
+}
+
+.info-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1200px;
+    width: 100%;
+    opacity: 0; /* Initially invisible */
+    transform: translateY(50px); /* Start lower */
+    transition: opacity 1s ease, transform 1s ease; /* Smooth transition */
+}
+
+.info-container.appear {
+    opacity: 1;
+    transform: translateY(0); /* Move to normal position */
+}
+
+.info-image {
+    width: 50%; /* Make the image take half of the container */
+    height: auto;
+    object-fit: cover;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.5); /* Neon glow for the image */
+    transition: transform 0.5s ease;
+}
+
+.info-image:hover {
+    transform: scale(1.05); /* Slight zoom effect on hover */
+}
+
+.info-text {
+    width: 45%; /* Text takes the remaining space */
+    color: white;
+}
+
+.info-text h2 {
+    font-size: 2em;
+    color: #00b8d4; /* Neon cyan for titles */
+    margin-bottom: 10px;
+}
+
+.info-text p {
+    font-size: 1.2em;
+    line-height: 1.6;
+}
+
+/* For mobile responsiveness, stack image and text vertically */
+@media (max-width: 768px) {
+    .info-container {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .info-image, .info-text {
+        width: 100%;
+    }
+}
+/* Button styling */
+.galaxy-button {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #00b8d4; /* Neon cyan */
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    font-size: 1.2em;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.galaxy-button:hover {
+    background-color: #460491; /* Darker cyan on hover */
+}
+
+/* Fullscreen Video Container */
+.video-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: black;
+    display: none; /* Hidden initially */
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+#galaxy-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Info Page */
+.info-page {
+    display: none; /* Hidden initially */
+    background: #070707; /* Dark background to match the theme */
+    color: white;
+    height: 100vh;
+    padding: 50px;
+    overflow: auto;
+    opacity: 0;
+    transition: opacity 1s ease;
+}
+
+.info-page.visible {
+    display: block;
+    opacity: 1;
+}
+
+/* Info Page Content Styling */
+.info-content h1 {
+    font-size: 3em;
+    margin-bottom: 20px;
+    color: #00b8d4;
+}
+
+.info-content p {
+    font-size: 1.2em;
+    line-height: 1.6;
+    max-width: 800px;
+    margin-bottom: 20px;
+}
+
+    </style>
+</head>
+<body>
+    <div id="loading-screen">
+        <div class="loading-content">
+            <div class="loader"></div>
+            <h1>.. هل انت جاهز</h1>
+        </div>
+    </div>
+    <section class="hero">
+        <video autoplay muted loop playsinline id="background-video">
+            <source src="background.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <div class="hero-content">
+            <h2>مرحبا بكم في سيريس</h2>
+            <p>اكتشاف أول كوكب قزم في حزام الكويكبات.</p>
+            <button id="discover-btn">اكتشف</button>
+        </div>
+    </section>
+
+    <nav id="navbar">
+        <div class="logo">
+            <h1>سيريس</h1>
+        </div>
+    </nav>
+
+    <!-- Scroll target -->
+    <div class="scroll-target"></div>
+
+    <!-- Video and Description Section -->
+    <div id="video-section">
+        <video autoplay muted loop id="video-player">
+            <source src="planet.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <div class="description">
+            <h2>سيريس: الكوكب القزم</h2>
+            <p>سيريس هو أكبر جسم في حزام الكويكبات بين المريخ والمشتري، ويصنف على أنه كوكب قزم وكويكب. اكتشفه جوزيبي بيازي عام 1801، ولا يزال أحد أكثر الأجسام إثارة للاهتمام في نظامنا الشمسي.</p>
+            <p>I لها تاريخ مثير للاهتمام، مع ميزات مثل نقطة مضيئة غامضة تشير إلى إمكانية وجود الماء تحت سطحها الجليدي. يعد استكشاف سيريس أمرًا حيويًا لفهم النظام الشمسي المبكر وإمكانية الحياة خارج الأرض..</p>
+        </div>
+    </div>
+    <div id="creative-gallery">
+        <div id="gallery-container">
+            <img class="gallery-image" src="ceres-planet-dwarf-planet-astronomical-object-wallpaper-preview.jpg" alt="Gallery Image 1">
+            <img class="gallery-image" src="Cérès.jpeg" alt="Gallery Image 2">
+            <img class="gallery-image" src="vzgs18iq.jpg" alt="Gallery Image 3">
+            <img class="gallery-image" src="aa.avif" alt="Gallery Image 4">
+            <img class="gallery-image" src="qq.jpg" alt="Gallery Image 5">
+        </div>
+        <div id="gallery-controls">
+            <button id="prev-btn">السابق</button>
+            <button id="next-btn">التالي</button>
+        </div>
+    </div>
+    <section class="info-section">
+        <div class="info-container">
+            <img src="cc.png" alt="Ceres Surface" class="info-image">
+            <div class="info-text">
+                <h2>عجائب سيريس</h2>
+                <p>
+                    يقدم سيريس، وهو أكبر جسم في حزام الكويكبات، رؤية فريدة للنظام الشمسي المبكر. وبفضل نقاطه المضيئة الغامضة ومحتواه من الجليد المائي، فقد أصبح موضوعًا لاستكشافات مكثفة.
+                </p>
+            </div>
+        </div>
+    </section>
+    <!-- Button to trigger video -->
+<button id="galaxy-button" class="galaxy-button">أدخل المجرة</button>
+
+<!-- Fullscreen Video Section (Initially Hidden) -->
+<div id="video-container" class="video-container">
+    <video id="galaxy-video" autoplay muted>
+        <source src="Galaxy Motion Background Video [HD] ~ FREE.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+</div>
+    
+
+<!-- Info Page (Initially Hidden) -->
+<div id="info-page" class="info-page">
+    <div class="info-content">
+        <h1>مرحباً بكم في المجرة</h1>
+        <p>
+            هنا يمكنك استكشاف كل شيء عن المجرة وخصائصها.
+تعرف على النجوم والثقوب السوداء والسدم وغير ذلك الكثير.
+        </p>
+        <p>
+            ترقبوا اكتشافات مثيرة واستكشفوا عجائب الكون!
+        </p>
+    </div>
+</div>
+
+    <script>
+        // Listen for the button click
+        document.getElementById('discover-btn').addEventListener('click', function() {
+            // Scroll down to the video section
+            window.scrollTo({
+                top: document.querySelector('#video-section').offsetTop,
+                behavior: 'smooth'
+            });
+
+            // Show the video section with a fade-in effect after scrolling
+            setTimeout(function() {
+                document.getElementById('video-section').style.opacity = 1;
+            }, 500); // Delay to allow smooth scroll
+        });
+
+        // Optional: Make sure the video section shows immediately when you scroll to it
+        window.addEventListener('scroll', function() {
+            let videoSection = document.getElementById('video-section');
+            let rect = videoSection.getBoundingClientRect();
+            if (rect.top <= window.innerHeight && rect.bottom >= 0) {
+                videoSection.style.opacity = 1;
+            }
+        });
+        const galleryImages = document.querySelectorAll('.gallery-image');
+const prevBtn = document.getElementById('prev-btn');
+const nextBtn = document.getElementById('next-btn');
+
+let currentIndex = 0;
+
+function updateGallery() {
+    galleryImages.forEach((image, index) => {
+        // Calculate the relative position of each image to the center
+        const offset = index - currentIndex;
+
+        if (offset === 0) {
+            // Central image
+            image.classList.add('center');
+        } else {
+            // Side images
+            image.classList.remove('center');
+        }
+
+        // Adjust the position of each image
+        image.style.transform = `translateX(${offset * 150}px)`; // Horizontal positioning
+    });
+}
+
+prevBtn.addEventListener('click', () => {
+    currentIndex = (currentIndex - 1 + galleryImages.length) % galleryImages.length;
+    updateGallery();
+});
+
+nextBtn.addEventListener('click', () => {
+    currentIndex = (currentIndex + 1) % galleryImages.length;
+    updateGallery();
+});
+
+// Initialize gallery
+updateGallery();
+document.addEventListener("DOMContentLoaded", () => {
+    const loadingScreen = document.getElementById("loading-screen");
+
+    // Wait 3 seconds before removing the loading screen
+    setTimeout(() => {
+        loadingScreen.style.display = "none";
+    }, 3000);
+});
+document.addEventListener("DOMContentLoaded", () => {
+    const infoContainer = document.querySelector(".info-container");
+
+    const observer = new IntersectionObserver(
+        (entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add("appear"); // Add the 'appear' class
+                    observer.unobserve(entry.target); // Stop observing once triggered
+                }
+            });
+        },
+        { threshold: 0.5 } // Trigger when 50% of the element is in view
+    );
+
+    observer.observe(infoContainer);
+});
+document.addEventListener("DOMContentLoaded", () => {
+    const galaxyButton = document.getElementById('galaxy-button');
+    const videoContainer = document.getElementById('video-container');
+    const galaxyVideo = document.getElementById('galaxy-video');
+
+    galaxyButton.addEventListener('click', () => {
+        // Show the video container
+        videoContainer.style.display = 'flex';
+        videoContainer.style.visibility = 'visible';
+        videoContainer.style.opacity = '1'; // Make sure it's visible
+
+        // Play the video
+        galaxyVideo.play();
+
+        // Listen for when the video ends
+        galaxyVideo.onended = () => {
+            // Fade out the video container
+            videoContainer.style.transition = 'opacity 0.8s ease';
+            videoContainer.style.opacity = '0';
+
+            // Redirect as soon as the fade-out finishes
+            videoContainer.addEventListener('transitionend', () => {
+                window.location.href = "pagetwo.html"; // Redirect immediately
+            }, { once: true }); // Ensures this event fires only once
+        };
+    });
+});
+
+
+
+    </script>
+
+</body>
+</html>
